@@ -1,12 +1,11 @@
 #pragma once
-
-#define GLFW_INCLUDE_VULKAN
 #include <vulkan/vulkan.h>
 #include <vulkan/vk_enum_string_helper.h>
-
-#define VK_NO_PROTOTYPES
 #include <cassert>
 #include <iostream>
+
+#define GLFW_INCLUDE_VULKAN
+#define VK_NO_PROTOTYPES
 
 
    #ifdef _WIN32

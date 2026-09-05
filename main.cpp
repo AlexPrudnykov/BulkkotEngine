@@ -1,12 +1,9 @@
-#define GLFW_INCLUDE_VULKAN
-#include<GLFW/glfw3.h>
-#include<iostream>
-#include<vector>
-#include<set>
-#include<fstream>
+#pragma once
+
+#include "App.hpp"
 
 
 int main(int argc, char **argv) {
-
-   return 0;
+   BulkkotEngine::App app = { };
+   app.run();
 }
