@@ -13,7 +13,7 @@ namespace BulkkotEngine {
       Window(int width, int height, std::string name);
       ~Window();
 
-      static GLFWwindow* getWindow();
+      GLFWwindow* getWindow();
 
       bool shouldClouse() {
          return glfwWindowShouldClose(window_);
@@ -26,6 +26,6 @@ namespace BulkkotEngine {
       const int height;
 
       std::string windowName_;
-      static GLFWwindow* window_;
+      GLFWwindow* window_;
    };
 }

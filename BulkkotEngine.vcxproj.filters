@@ -36,6 +36,9 @@
     <ClCompile Include="Pipeline.cpp">
       <Filter>Source Files\renderer</Filter>
     </ClCompile>
+    <ClCompile Include="Surface.cpp">
+      <Filter>Source Files\renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Context.hpp">
@@ -54,6 +57,9 @@
       <Filter>Source Files\renderer</Filter>
     </ClInclude>
     <ClInclude Include="Pipeline.hpp">
+      <Filter>Source Files\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Surface.hpp">
       <Filter>Source Files\renderer</Filter>
     </ClInclude>
   </ItemGroup>

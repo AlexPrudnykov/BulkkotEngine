@@ -135,6 +135,7 @@
     <ClCompile Include="Context.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Pipeline.cpp" />
+    <ClCompile Include="Surface.cpp" />
     <ClCompile Include="Utility.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
@@ -143,6 +144,7 @@
     <ClInclude Include="Common.hpp" />
     <ClInclude Include="Context.hpp" />
     <ClInclude Include="Pipeline.hpp" />
+    <ClInclude Include="Surface.hpp" />
     <ClInclude Include="Utility.hpp" />
     <ClInclude Include="Window.hpp" />
   </ItemGroup>

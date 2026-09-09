@@ -1,14 +1,11 @@
-#define VMA_IMPLEMENTATION
-#define TINYOBJLOADER_IMPLEMENTATION
-
-
 #include "Context.hpp"
-#include "Window.hpp"
+#include "Surface.hpp"
 
 
 namespace BulkkotEngine {
-   Context::Context() {
-      utility_ = Utility();
+   Context::Context(Window& window) : window_{ window }
+   {
+      createUtility();
 
       createInstance();
       createSurface();
@@ -19,6 +16,7 @@ namespace BulkkotEngine {
    }
 
    void Context::createInstance() {
+
       // App Information 
       VkApplicationInfo appInfo = {
          .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
@@ -61,27 +59,18 @@ namespace BulkkotEngine {
 
 
    void Context::createSurface() {
-      const auto windowGlfw = glfwGetWin32Window(Window::getWindow());
-
-      #if defined(VK_USE_PLATFORM_WIN32_KHR) && defined(VK_KHR_win32_surface)
-         if (utility_.getInstanceExtensionsSet().contains(VK_KHR_WIN32_SURFACE_EXTENSION_NAME)) {
-            if (windowGlfw != nullptr) {
-               const VkWin32SurfaceCreateInfoKHR ci = {
-                  .sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
-                  .hinstance = GetModuleHandle(NULL),
-                  .hwnd = (HWND)windowGlfw
-               };
-               VK_CHECK(vkCreateWin32SurfaceKHR(instance_, &ci, nullptr, &surface_));
-            }
-         }
-      #endif
+      surface_ = std::make_unique<Surface>(instance_, window_.getWindow(), *utility_);
    }
 
    std::vector<std::string> Context::getLayers() {
-      return utility_.requestedLayers();
+      return utility_->requestedLayers();
    }
 
    std::vector<std::string> Context::getExtensions() {
-      return utility_.requestedExtensions();
+      return utility_->requestedExtensions();
 ;   }
+
+   void Context::createUtility() {
+      utility_ = std::make_unique<Utility>();
+   }
 }

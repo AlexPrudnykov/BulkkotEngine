@@ -1,8 +1,6 @@
 #include "window.hpp"
 
 namespace BulkkotEngine {
-   GLFWwindow* Window::window_ = nullptr;
-
    Window::Window(int width, int height, std::string name) : width{ width }, height{ height }, windowName_{name} {
       initWindow();
    }

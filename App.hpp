@@ -1,20 +1,18 @@
 ﻿#pragma one
 
 #include "window.hpp"
-#include "Pipeline.hpp"
+#include "Context.hpp"
 
 namespace BulkkotEngine {
    class App {
 
    public:
-      static constexpr int WIDTH = 600;
-      static constexpr int HEIGHT = 600;
+      App(int width = 600, int height = 600, const std::string& title = "안녕, 엔진!");
 
       void run();
 
    private:
-
-      // Create window
-      Window window = { WIDTH, HEIGHT, "안녕, 엔진!"};
+      Window window;
+      Context context;
    };
 }
