@@ -16,7 +16,11 @@
 namespace BulkkotEngine {
    class Context {
    public:
-      Context(Window& window);
+      Context(Window& window,
+              std::vector<std::string> requestedLayers,
+              std::vector<std::string> requestedDeviceExtensions,
+              std::vector<std::string> requestedInstanceExtensions
+              );
       ~Context();
 
       VkQueue getQueue();
@@ -32,14 +36,20 @@ namespace BulkkotEngine {
       VkInstance instance_;
       VkPhysicalDevice physicalDevice_;
 
+      #if defined(VK_EXT_debug_utils)
+         VkDebugUtilsMessengerEXT messenger_ = VK_NULL_HANDLE;
+      #endif
+
+      std::unordered_set<std::string> enabledLayers_;
+      std::unordered_set<std::string> enabledDeviceExtensions_;
+      std::unordered_set<std::string> enabledInstanceExtensions_;
+
       void createQueue();
       void createDevice();
       void createSurface();
-      void createInstance();
+      void addDebugMessenger();
       void createPhysicalDevice();
-
-      std::vector<std::string> getLayers();
-      std::vector<std::string> getExtensions();
+      void createInstance(std::vector<std::string> requestedLayers, std::vector<std::string> requestedInstanceExtensions);
 
       void createUtility();
    };

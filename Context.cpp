@@ -3,11 +3,15 @@
 
 
 namespace BulkkotEngine {
-   Context::Context(Window& window) : window_{ window }
+   Context::Context(Window& window,
+                    std::vector<std::string> requestedLayers,
+                    std::vector<std::string> requestedDeviceExtensions,
+                    std::vector<std::string> requestedInstanceExtensions) : window_{ window }
    {
       createUtility();
 
-      createInstance();
+      createInstance(requestedLayers, requestedInstanceExtensions);
+      addDebugMessenger();
       createSurface();
    }
 
@@ -15,7 +19,7 @@ namespace BulkkotEngine {
 
    }
 
-   void Context::createInstance() {
+   void Context::createInstance(std::vector<std::string> requestedLayers, std::vector<std::string> requestedInstanceExtensions) {
 
       // App Information 
       VkApplicationInfo appInfo = {
@@ -27,26 +31,39 @@ namespace BulkkotEngine {
          .apiVersion = VK_API_VERSION_1_4
       };
 
+      enabledLayers_ = utility_->filterLayers(utility_->getAvailableLayers(), requestedLayers);
+      enabledInstanceExtensions_ = utility_->filterExtensions(utility_->getAvailableInstanceExtensions(), requestedInstanceExtensions);
+
+      std::vector<std::string> enabledInstanceLayers(
+         enabledLayers_.begin(),
+         enabledLayers_.end()
+      );
+
+      std::vector<std::string> enabledInstanceExtensions(
+         enabledInstanceExtensions_.begin(),
+         enabledInstanceExtensions_.end()
+      );
 
       // Layers
       std::vector<const char*> layers;
-      std::vector<std::string> instanceLayers = getLayers();
-      layers.reserve(instanceLayers.size());
-      for (const std::string& s : instanceLayers) {
+      layers.reserve(enabledInstanceLayers.size());
+      for (const std::string& s : enabledInstanceLayers) {
          layers.push_back(s.c_str());
       }
 
       // Extensions
       std::vector<const char*> extensions;
-      std::vector<std::string> instanceExtensions = getExtensions();
-      extensions.reserve(instanceExtensions.size());
-      for (const std::string& s : instanceExtensions) {
+      extensions.reserve(enabledInstanceExtensions.size());
+      for (const std::string& s : enabledInstanceExtensions) {
          extensions.push_back(s.c_str());
       }
+
+      auto features = utility_->getValidationConfig(false).validationFeatures;
 
       // Create vulkan instance
       VkInstanceCreateInfo createInfo = {
          .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+         .pNext = &features,
          .pApplicationInfo = &appInfo,
          .enabledLayerCount = static_cast<uint32_t>(layers.size()),
          .ppEnabledLayerNames = layers.data(),
@@ -58,17 +75,14 @@ namespace BulkkotEngine {
    }
 
 
+   void Context::addDebugMessenger() {
+      const VkDebugUtilsMessengerCreateInfoEXT messengerInfo = utility_->getMessengerConfig(enabledInstanceExtensions_);
+      VK_CHECK(vkCreateDebugUtilsMessengerEXT(instance_, &messengerInfo, nullptr, &messenger_));
+   }
+
    void Context::createSurface() {
-      surface_ = std::make_unique<Surface>(instance_, window_.getWindow(), *utility_);
+      surface_ = std::make_unique<Surface>(instance_, window_.getWindow(), enabledInstanceExtensions_);
    }
-
-   std::vector<std::string> Context::getLayers() {
-      return utility_->requestedLayers();
-   }
-
-   std::vector<std::string> Context::getExtensions() {
-      return utility_->requestedExtensions();
-;   }
 
    void Context::createUtility() {
       utility_ = std::make_unique<Utility>();

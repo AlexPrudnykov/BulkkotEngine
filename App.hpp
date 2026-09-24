@@ -10,6 +10,9 @@ namespace BulkkotEngine {
       App(int width = 600, int height = 600, const std::string& title = "안녕, 엔진!");
 
       void run();
+      std::vector<std::string> requestedLayers();
+      std::vector<std::string> requestedDeviceExtensions();
+      std::vector<std::string> requestedInstanceExtensions();
 
    private:
       Window window;

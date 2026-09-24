@@ -17,7 +17,7 @@
 namespace BulkkotEngine {
    class Surface {
    public:
-      Surface(VkInstance instance, GLFWwindow* window, Utility& utility);
+      Surface(VkInstance instance, GLFWwindow* window, std::unordered_set<std::string> enabledInstanceExtensions);
       ~Surface();
 
       VkSurfaceKHR getVkSurface();
@@ -25,6 +25,6 @@ namespace BulkkotEngine {
    private:
       VkSurfaceKHR surface_;
 
-      void createSurface(VkInstance instance, GLFWwindow* window, Utility& utility);
+      void createSurface(VkInstance instance, GLFWwindow* window, std::unordered_set<std::string> enabledInstanceExtensions);
    };
 }
