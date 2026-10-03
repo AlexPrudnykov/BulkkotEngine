@@ -29,11 +29,21 @@ namespace BulkkotEngine {
       return availableLayesr;
    }
 
-   std::vector<std::string> Utility::getAvailableInstanceExtensions() {
+   std::vector<std::string> Utility::getAvailableInstanceExtensions(std::optional<std::string> extraExtensions) {
       uint32_t extensionsCount = { 0 };
       vkEnumerateInstanceExtensionProperties(nullptr, &extensionsCount, nullptr);
       std::vector<VkExtensionProperties> extensioProperties(extensionsCount);
       vkEnumerateInstanceExtensionProperties(nullptr, &extensionsCount, extensioProperties.data());
+
+      if (extraExtensions.has_value()) {
+         uint32_t layerExtensionCount = 0;
+
+         if (vkEnumerateInstanceExtensionProperties(extraExtensions->c_str(), &layerExtensionCount, nullptr) == VK_SUCCESS && layerExtensionCount > 0) {
+            size_t baseSize = extensioProperties.size();
+            extensioProperties.resize(baseSize + layerExtensionCount);
+            vkEnumerateInstanceExtensionProperties(extraExtensions->c_str(), &layerExtensionCount, extensioProperties.data() + baseSize);
+         }
+      }
 
       std::vector<std::string> availableExtensions;
       std::transform(
@@ -80,9 +90,9 @@ namespace BulkkotEngine {
    Utility::ValidationConfig Utility::getValidationConfig(bool enableShaderPrintf) const {
       ValidationConfig config = { };
 
-      #if defined(VK_EXT_layer_setting)
-         config.layerSetting = {
-            VkLayerSettingEXT = {
+       #if defined(VK_EXT_layer_settings)
+         config.layerSettings = {
+            VkLayerSettingEXT {
                .pLayerName = config.layerName.c_str(),
                .pSettingName = "debug_action",
                .type = VK_LAYER_SETTING_TYPE_STRING_EXT,
@@ -90,15 +100,15 @@ namespace BulkkotEngine {
                .pValues = config.debugAction.data()
             },
 
-            VkLayerSettingEXT = {
+            VkLayerSettingEXT {
                .pLayerName = config.layerName.c_str(),
                .pSettingName = "validate_gpu_based",
                .type = VK_LAYER_SETTING_TYPE_STRING_EXT,
-               .valueCount = static_cast<uint32_t>(config.gpuBaseedAction.size()),
+               .valueCount = static_cast<uint32_t>(config.gpuBasedAction.size()),
                .pValues = config.gpuBasedAction.data()
             },
 
-            VkLayerSettingEXT = {
+            VkLayerSettingEXT {
                .pLayerName = config.layerName.c_str(),
                .pSettingName = "printf_to_stdout",
                .type = VK_LAYER_SETTING_TYPE_BOOL32_EXT,
@@ -106,7 +116,7 @@ namespace BulkkotEngine {
                .pValues = &config.printfToStdout
             },
 
-            VkLayerSettingEXT = {
+            VkLayerSettingEXT {
                .pLayerName = config.layerName.c_str(),
                .pSettingName = "printf_verbose",
                .type = VK_LAYER_SETTING_TYPE_BOOL32_EXT,
@@ -116,20 +126,16 @@ namespace BulkkotEngine {
 
          };
 
-         config.layerSettingsCreateInfo.sType = VK_STRUCTURE_TYPE_LAYER_SETTINGS_CREATE_INFO_EXT;
-         config.layerSettingsCreateInfo.pNext = nullptr;
          config.layerSettingsCreateInfo.settingCount = static_cast<uint32_t>(config.layerSettings.size());
          config.layerSettingsCreateInfo.pSettings = config.layerSettings.data();
 
-         #elif defined(VK_EXT_layer_settings)
+         #elif defined(VK_EXT_validation_features)
             if (enableShaderPrintf) {
                config.enabledFeatures.push_back(VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT);
             } else {
                config.enabledFeatures.push_back(VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT);
             }
 
-            config.validationFeatures.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
-            config.validationFeatures.pNext = nullptr;
             config.validationFeatures.enabledValidationFeatureCount = static_cast<uint32_t>(config.enabledFeatures.size());
             config.validationFeatures.pEnabledValidationFeatures = config.enabledFeatures.data();
          #endif
@@ -154,11 +160,49 @@ namespace BulkkotEngine {
          #endif
 
          ,
-         .pfnUserCallback = nullptr,
+         .pfnUserCallback = setupDebugMessenger(),
          .pUserData = nullptr
       };
 
       return messengerInfo;
    }
+
+   PFN_vkDebugUtilsMessengerCallbackEXT Utility::setupDebugMessenger()
+   {
+         #if defined(VK_EXT_debug_utils)
+         auto debugCallback = [](VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+                                 VkDebugUtilsMessageTypeFlagsEXT messageType,
+                                 const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+                                 void* pUserData) -> VkBool32 VKAPI_PTR {
+
+         const char* messageId = (pCallbackData && pCallbackData->pMessageIdName) ? pCallbackData->pMessageIdName:"N/A";
+         const char* message = (pCallbackData && pCallbackData->pMessage) ? pCallbackData->pMessage:"N/A";
+
+         if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+         {
+            LOGE("debugMessengerCallback : MessageCode is %s & Message is %s", messageId, message);
+
+            // Прерываем выполнение ТОЛЬКО при ошибках!
+            #if defined(_WIN32)
+               __debugbreak();
+            #elif defined(__linux__) || defined(__APPLE__)
+               __builtin_trap();
+            #endif
+
+         } else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
+            LOGW("debugMessengerCallback : MessageCode is %s & Message is %s", messageId, message);
+         } else {
+            LOGI("debugMessengerCallback : MessageCode is %s & Message is %s", messageId, message);
+         }
+
+            return VK_FALSE;
+      };
+
+      return debugCallback;
+
+      #else
+         return nullptr;
+      #endif
+   };
 
 }

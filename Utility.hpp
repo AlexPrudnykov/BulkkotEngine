@@ -10,8 +10,18 @@
 #include <unordered_set>
 #include <vector>
 
-
 namespace BulkkotEngine {
+   #define LOGE(format, ...)                 \
+     do {                                    \
+       fprintf(stderr, format, __VA_ARGS__); \
+       fprintf(stderr, "\n");                \
+     } while (0)                             \
+
+   #define LOGW(format, ...) LOGE(format, __VA_ARGS__)
+   #define LOGI(format, ...) LOGE(format, __VA_ARGS__)
+   #define LOGD(format, ...) LOGE(format, __VA_ARGS__)
+
+
    class Utility {
 
       public:
@@ -23,17 +33,24 @@ namespace BulkkotEngine {
             VkBool32 printfToStdout = { VK_TRUE };
             VkBool32 printfVerbose = { VK_TRUE };
             std::vector<VkLayerSettingEXT> layerSettings;
-            VkLayerSettingsCreateInfoEXT layerSettingsCreateInfo = { };
+            VkLayerSettingsCreateInfoEXT layerSettingsCreateInfo = {
+               .sType = VK_STRUCTURE_TYPE_LAYER_SETTINGS_CREATE_INFO_EXT,
+               .pNext = nullptr
+            };
             std::vector<VkValidationFeatureEnableEXT> enabledFeatures;
-            VkValidationFeaturesEXT validationFeatures = { };
+            VkValidationFeaturesEXT validationFeatures = {
+               .sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT,
+               .pNext = nullptr
+            };
          };
 
          Utility();
          ~Utility();
 
          std::vector<std::string> getAvailableLayers();
-         std::vector<std::string> getAvailableInstanceExtensions();
+         PFN_vkDebugUtilsMessengerCallbackEXT setupDebugMessenger();
          ValidationConfig getValidationConfig(bool enableShaderPrintf = true) const;
+         std::vector<std::string> getAvailableInstanceExtensions(std::optional<std::string> extraExtensions = std::nullopt);
          VkDebugUtilsMessengerCreateInfoEXT getMessengerConfig(std::unordered_set<std::string> enabledInstanceExtensions);
          std::unordered_set<std::string> filterLayers(std::vector<std::string> availableLayers, std::vector<std::string> requestedLayers);
          std::unordered_set<std::string> filterExtensions(std::vector<std::string> availableExtensions, std::vector<std::string> requestedExtensions);

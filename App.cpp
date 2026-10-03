@@ -49,6 +49,14 @@ namespace BulkkotEngine {
          requestedInstanceExtensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
       #endif
 
+      #ifdef VK_EXT_validation_features
+         requestedInstanceExtensions.push_back(VK_EXT_VALIDATION_FEATURES_EXTENSION_NAME);
+      #endif
+
+      #ifdef VK_EXT_layer_settings
+         requestedInstanceExtensions.push_back(VK_EXT_LAYER_SETTINGS_EXTENSION_NAME);
+      #endif
+
       return requestedInstanceExtensions;
    }
 }
