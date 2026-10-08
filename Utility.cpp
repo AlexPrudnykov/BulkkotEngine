@@ -182,7 +182,6 @@ namespace BulkkotEngine {
          {
             LOGE("debugMessengerCallback : MessageCode is %s & Message is %s", messageId, message);
 
-            // Прерываем выполнение ТОЛЬКО при ошибках!
             #if defined(_WIN32)
                __debugbreak();
             #elif defined(__linux__) || defined(__APPLE__)
